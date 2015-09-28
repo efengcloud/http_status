@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# (de)activate is for http_status
+#
+activate() {
+	echo -n $"Activating $1 : "
+  if [ -d /var/run/http_status ]
+  then
+	  touch /var/run/http_status/$1 >/dev/null 2>&1
+    RETVAL="$?"
+    if [ A$RETVAL = "A0" ]
+    then
+      echo_success
+      echo
+      return 0
+    else
+      echo -n "Unable to create file!"
+      echo_failure
+      echo
+      return 1
+    fi
+	else
+    echo -n "is http_status installed?!"
+    echo_failure
+    echo
+    return 1
+  fi
+}
+
+deactivate() {
+	echo -n $"Deactivating $1 : "
+  if [ -d /var/run/http_status ]
+  then
+	  rm -f /var/run/http_status/$1 >/dev/null 2>&1
+    RETVAL="$?"
+    if [ A$RETVAL = "A0" ]
+    then
+      echo_success
+      echo
+      return 0
+    else
+      echo -n "Unable to remove file!"
+      echo_failure
+      echo
+      return 1
+    fi
+	else
+    echo -n "is http_status installed?!"
+    echo_failure
+    echo
+    return 1
+  fi
+}
+
