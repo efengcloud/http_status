@@ -1,30 +1,7 @@
-//http_status 是一个用来进行为squid/haproxy/lvs等进行7层健康检测而设计的
-//精简的httpd服务器，能够执行简单的类似status.html静态文件的作用，使用方法
-//如下：
-//GET /status?PORT=80&SERVICE=squid&VIP=1.2.3.4
-//服务器使用方法
-//Usage: http_status [options]
-//
-//Options:
-//  -h, --help            show this help message and exit
-//  -p PORT, --port=PORT  port to listen
-//  -i IP, --ip=IP        ip address to bind
-//服务器将会在/var/run/http_status/检测相应的文件，如存在，则返回200，否则返回
-//404。如定义VIP也会增加探测VIP地址。
-//URL处理方式：
-//1，只支持GET协议，其他不支持
-//2，只定义了/status接口(目录），其他不支持
-//3，定义了SERVICE、PORT、VIP 3个变量
-//   SERVICE如不定义则默认文件为status.html
-//   PORT定义后，则检测文件为SERVICE.PORT，如上例中则为squid.80
-//   VIP地址定义后，将会检测是否有VIP的loopback地址
-//
-//配合启动脚本的"--activate" "--inactivate"会更方便使用：
-// /etc/init.d/trafficserver activate
-//to use the (in)activate, your init script should:
-//
+//http_status is a tiny http health status server
 //
 // TODO: should we make statusdir a runtime config?
+// TODO: should we log access logs?
 
 package main
 
