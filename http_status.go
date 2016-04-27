@@ -52,7 +52,7 @@ func main() {
 
 	listenaddr := fmt.Sprint(flagip, ":", flagport)
 
-	fmt.Printf("Starting http_status on: %s\n", listenaddr)
+	// fmt.Printf("Starting http_status on: %s\n", listenaddr)
 
 	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		// Setup Server response env

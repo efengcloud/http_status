@@ -1,8 +1,8 @@
 Summary:	http_status - L7 http health check server
 Summary(zh_CN.UTF-8):	http_status - 7层的健康检测服务器
 Name:		http_status
-Version:	0.0.4
-Release:	1
+Version:	0.0.5
+Release:	%_release
 Vendor:		Zhao Yongming
 Packager: 	Zhao Yongming <zym@efengcloud.com>
 License:	Apache 2
@@ -12,7 +12,7 @@ Source1:	http_status.init
 Source2:	http_status.functions
 URL:		http://www.efengcloud.com
 BuildRequires:	golang
-BuildArchitectures: noarch
+BuildArchitectures: x86_64
 
 %description -l zh_CN.UTF-8
 http_status 是一个用来进行为squid/haproxy/lvs等进行7层健康检测而设计的
@@ -48,7 +48,7 @@ go build
 %install
 install -m 755 -D %SOURCE1 $RPM_BUILD_ROOT%{_sysconfdir}/init.d/http_status
 install -m 755 -D %SOURCE2 $RPM_BUILD_ROOT%{_sysconfdir}/init.d/http_status.functions
-install -m 755 -D %SOURCE0 $RPM_BUILD_ROOT%{_bindir}/http_status
+install -m 755 -D http_status $RPM_BUILD_ROOT%{_bindir}/http_status
 install -d $RPM_BUILD_ROOT/var/run/http_status
 %clean
 #rm -rf $RPM_BUILD_ROOT
