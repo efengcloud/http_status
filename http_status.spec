@@ -1,7 +1,7 @@
 Summary:	http_status - L7 http health check server
 Summary(zh_CN.UTF-8):	http_status - 7层的健康检测服务器
 Name:		http_status
-Version:	0.0.5
+Version:	0.0.6
 Release:	%_release
 Vendor:		Zhao Yongming
 Packager: 	Zhao Yongming <zym@efengcloud.com>
@@ -47,7 +47,7 @@ go build
 
 %install
 install -m 755 -D %SOURCE1 $RPM_BUILD_ROOT%{_sysconfdir}/init.d/http_status
-install -m 755 -D %SOURCE2 $RPM_BUILD_ROOT%{_sysconfdir}/init.d/http_status.functions
+install -m 644 -D %SOURCE2 $RPM_BUILD_ROOT%{_sysconfdir}/init.d/http_status.functions
 install -m 755 -D http_status $RPM_BUILD_ROOT%{_bindir}/http_status
 install -d $RPM_BUILD_ROOT/var/run/http_status
 %clean

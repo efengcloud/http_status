@@ -12,17 +12,66 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
+	"syscall"
 )
 
 const statusdir = "/var/run/http_status"
+
+// Detach from controling terminal and run in the background as system daemon.
+// redirects os.Stdin, os.Stdout and os.Stderr to "/dev/null"
+func Daemonize() (*os.Process, error) {
+	daemonizeState := os.Getenv("_GOLANG_DAEMONIZE_FLAG")
+	switch daemonizeState {
+	case "":
+		syscall.Umask(0)
+		os.Setenv("_GOLANG_DAEMONIZE_FLAG", "1")
+	case "1":
+		syscall.Setsid()
+		os.Setenv("_GOLANG_DAEMONIZE_FLAG", "2")
+	case "2":
+		return nil, nil
+	}
+
+	var attrs os.ProcAttr
+
+	attrs.Dir = "/tmp"
+	f, err := os.Open("/dev/null")
+	if err != nil {
+		return nil, err
+	}
+	attrs.Files = []*os.File{f, f, f}
+
+	exe, err := filepath.Abs(os.Args[0])
+	if err != nil {
+		return nil, err
+	}
+
+	realexe, err := filepath.EvalSymlinks(exe)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := os.StartProcess(realexe, os.Args, &attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
 
 func main() {
 
 	// we have only two option flags to adapt, listen ip address and port.
 	var flagport uint
 	var flagip string
+	var godaemon bool
+	var pidfile string
 	flag.UintVar(&flagport, "port", 8001, "port to listen")
 	flag.UintVar(&flagport, "p", 8001, "port to listen, in short")
+	flag.BoolVar(&godaemon, "daemon", false, "go daemon")
+	flag.BoolVar(&godaemon, "d", false, "go daemon")
+	flag.StringVar(&pidfile, "pidfile", "", "ip address to bind")
 	flag.StringVar(&flagip, "ip", "127.0.0.1", "ip address to bind")
 	flag.StringVar(&flagip, "i", "127.0.0.1", "ip address to bind, in short")
 	flag.Parse()
@@ -90,5 +139,36 @@ func main() {
 
 	})
 
-	log.Fatal(http.ListenAndServe(listenaddr, nil))
+	if godaemon {
+		p, err := Daemonize()
+		if err != nil {
+			log.Fatalf("Daemonize failed: %v", err)
+		}
+
+		if p != nil {
+			// parent process, nop
+			return
+		} else {
+			// let's do the work
+
+			if pidfile != "" {
+				// we don't guarantee that pidfile is not created already
+				// TODO: add pidfile locking to prevent run, do we need?
+				abspidfile, _ := filepath.Abs(pidfile)
+				pidf, err := os.OpenFile(abspidfile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+				if err == nil {
+					fmt.Fprint(pidf, os.Getpid())
+					pidf.Close()
+					defer os.Remove(abspidfile) // hmm, can we remove after kill?
+				}
+			}
+
+			// let's go
+			log.Fatal(http.ListenAndServe(listenaddr, nil))
+		}
+
+	} else {
+		// don't go daemon, run it
+		log.Fatal(http.ListenAndServe(listenaddr, nil))
+	}
 }

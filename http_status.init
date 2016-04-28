@@ -42,23 +42,22 @@ probe() {
 start() {
 	probe
 	echo -n $"Starting http_status on $HTTP_STATUS_IP:$HTTP_STATUS_PORT "
-	daemon --force --pidfile /var/run/http_status.pid /usr/bin/http_status --port=$HTTP_STATUS_PORT --ip=$HTTP_STATUS_IP &
+	daemon /usr/bin/http_status --port=$HTTP_STATUS_PORT --ip=$HTTP_STATUS_IP -d --pidfile /var/run/http_status.pid
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && echo_success
 	[ $RETVAL -ne 0 ] && echo_failure
 	echo
-	[ $RETVAL -ne 0 ] && return $RETVAL
+	return $RETVAL
 }
 
 stop() {
 	echo -n $"Stoping http_status "
-	##killproc -p /var/run/http_status.pid http_status
-	killproc http_status
+	killproc -p /var/run/http_status.pid /usr/bin/http_status
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && echo_success
 	[ $RETVAL -ne 0 ] && echo_failure
 	echo
-	[ $RETVAL -ne 0 ] && return $RETVAL
+	return $RETVAL
 }
 
 restart() {
